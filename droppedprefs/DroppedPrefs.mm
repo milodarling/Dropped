@@ -1,6 +1,7 @@
 #import <Preferences/Preferences.h>
 #import <SettingsKit/SKListControllerProtocol.h>
 #import <SettingsKit/SKTintedListController.h>
+#import <SettingsKit/SKSharedHelper.h>
 #import <UIKit/UIKit.h>
 
 @interface DroppedPrefsListController: SKTintedListController<SKListControllerProtocol>{
@@ -17,9 +18,6 @@
 
 -(BOOL) showHeartImage { return YES; }
 -(BOOL) shiftHeartImage { return YES; }
-//-(UIColor*) heartImageColor {
-//    return [UIColor colorWithRed:85.0f/255.0f green:172.0f/255.0f blue:238.0f/255.0f alpha:1.0];
-//}
 -(NSString*) shareMessage { return @"#Dropped by @JamesIscNeutron is an awful tweak. I hate it."; }
 
 -(NSString*) headerImage { return @"header.png"; }
@@ -60,12 +58,13 @@
                  },
              @{
                  @"cell": @"PSGroupCell",
-                 @"label": @""
+                 @"label": @"",
+                 @"footerText": @"Please note that it may take up to 30 seconds at most for the event to start working when you enable it. This is hopefully temporary, and is necessary to save battery for the time being.",
                  },
              @{
                  @"cell": @"PSButtonCell",
                  @"label": @"Created by Milo Darling",
-                 @"action": @"openWebsite",
+                 @"action": @"openMiloTwitter",
                  @"cellClass": @"SKTintedCell",
                  @"icon": @"makers.png",
                  },
@@ -86,8 +85,9 @@
              ];
 }
 
--(void)openWebsite {
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"http://cheeseindustries.net"]];
+-(void) openMiloTwitter
+{
+    [SKSharedHelper openTwitter:@"JamesIscNeutron"];
 }
 
 -(void)viewSource {
