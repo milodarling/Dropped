@@ -1,0 +1,10 @@
+{
+    entry = {
+	bundle = DroppedPrefs;
+	cell = PSLinkCell;
+	detail = DroppedPrefsListController;
+	icon = DroppedPrefs.png;
+	isController = 1;
+	label = Dropped;
+    };
+}
