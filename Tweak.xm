@@ -3,6 +3,12 @@
 #import <libactivator/libactivator.h>
 #import "Dropped.h"
 
+#ifdef DEBUG
+#define DebugLog(s, ...) NSLog(@"[Dropped] %@", [NSString stringWithFormat:(s), ##__VA_ARGS__])
+#else
+#define DebugLog(s, ...)
+#endif
+
 Dropped *droppedController;
 
 static NSString *fallingID = @"com.milodarling.dropped.falling";
@@ -78,7 +84,6 @@ static DroppedDataSource *MDDroppedDataSource;
 @end
 
 @implementation Dropped
-@synthesize prefs;
 
 - (id)init{
     if (self=[super init]){
@@ -92,13 +97,12 @@ static DroppedDataSource *MDDroppedDataSource;
 
 // Did receive preference reload notification
 - (void)loadPrefs{
-    // Destroy the world
-    if (prefs) [[self prefs] release];
-    
     // Load preferences
-    prefs=[[NSDictionary alloc] initWithContentsOfFile:@"/var/mobile/Library/Preferences/com.milodarling.dropped.plist"];
-    fallSensitivity=[[[self prefs] objectForKey:@"fallingSensitivity"] doubleValue] ?: 0.04;
-    stopSensitivity=[[[self prefs] objectForKey:@"stoppingSensitivity"] doubleValue] ?: 6.0;
+    CFPreferencesAppSynchronize(CFSTR("com.milodarling.dropped"));
+    fallSensitivity=[(id)CFPreferencesCopyAppValue(CFSTR("fallingSensitivity"), CFSTR("com.milodarling.dropped")) doubleValue];
+    DebugLog(@"Falling sensitivity: %.2f", fallSensitivity);
+    stopSensitivity=[(id)CFPreferencesCopyAppValue(CFSTR("stoppingSensitivity"), CFSTR("com.milodarling.dropped")) doubleValue];
+    DebugLog(@"Stopping sensitivity: %.2f", stopSensitivity);
     
     assignedListenersFalling = [LASharedActivator assignedListenerNamesForEvent:[LAEvent eventWithName:fallingID]];
     assignedListenersStopping = [LASharedActivator assignedListenerNamesForEvent:[LAEvent eventWithName:stoppingID]];
@@ -114,7 +118,7 @@ static DroppedDataSource *MDDroppedDataSource;
     
     // Are we completely disabled?
     if (assignedListenersStopping || assignedListenersFalling) {
-        NSLog(@"Dropped: We have something assigned to us, we're running");
+        DebugLog(@"We have something assigned to us, we're running");
         // Control variables
         falling=NO;
         stopping=NO;
@@ -127,7 +131,7 @@ static DroppedDataSource *MDDroppedDataSource;
         // Start the timer after a delay (was causing issues with the Preference Pane)
         [NSTimer scheduledTimerWithTimeInterval:0.2 target:self selector:@selector(enableTimer:) userInfo:nil repeats:NO];
     } else {
-        NSLog(@"Dropped: Nothing's assigned, we're not starting the timer or we're killing it.");
+        DebugLog(@"Nothing's assigned, we're not starting the timer or we're killing it.");
         
     }
 }
@@ -154,11 +158,7 @@ static DroppedDataSource *MDDroppedDataSource;
 }
 
 //check if we're being used (if we aren't we can kill the timer/accelerometer updating to save battery)
--(void)checkAssignments:(NSTimer *)checkActivator {
-    assignedListenersFalling = [LASharedActivator assignedListenerNamesForEvent:[LAEvent eventWithName:fallingID]];
-    assignedListenersStopping = [LASharedActivator assignedListenerNamesForEvent:[LAEvent eventWithName:stoppingID]];
-    [self updateState];
-}
+-(void)checkAssignments:(NSTimer *)checkActivator { [self loadPrefs]; }
         
 - (void)enableTimer:(NSTimer *)timer{
     _freeFallExecuteTimer=[NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(updateAccelData:) userInfo:nil repeats:YES];

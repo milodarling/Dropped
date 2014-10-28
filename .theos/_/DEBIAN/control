@@ -1,10 +1,10 @@
 Package: com.milodarling.dropped
 Name: Dropped
-Depends: mobilesubstrate, libactivator
+Depends: mobilesubstrate, preferenceloader, libactivator
 Architecture: iphoneos-arm
 Description: Activator event for device falling or hitting the ground.
 Maintainer: Milo Darling
 Author: Milo Darling
 Section: Tweaks
-Version: 1.0-1
+Version: 1.1-1
 Installed-Size: 464
